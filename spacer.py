@@ -1,3 +1,8 @@
+# Copy to appropriate directory, like ~/.config/sway/
+# In ~/.config/sway/config - pipe i3status-rs into spacer.py:
+#     status_command i3status-rs ..... | python ..../spacer.py maxwidth
+# Where maxwidth is the maximum desired width of the bar in characters
+
 import sys
 
 width = int(sys.argv[1])
