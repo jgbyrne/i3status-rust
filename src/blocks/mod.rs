@@ -4,6 +4,7 @@ mod load;
 mod memory;
 mod cpu;
 mod music;
+mod static_music;
 mod battery;
 mod custom;
 mod disk_space;
@@ -24,6 +25,7 @@ use config::Config;
 use self::time::*;
 use self::template::*;
 use self::music::*;
+use self::static_music::*;
 use self::cpu::*;
 use self::load::*;
 use self::memory::*;
@@ -76,6 +78,7 @@ pub fn create_block(name: &str, block_config: Value, config: Config, tx_update_r
             "time" => Time,
             "template" => Template,
             "music" => Music,
+            "static_music" => StaticMusic,
             "load" => Load,
             "memory" => Memory,
             "cpu" => Cpu,
