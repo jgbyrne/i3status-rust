@@ -156,9 +156,9 @@ impl Block for Cpu {
         });
         if self.frequency {
             let frequency = format!("{:.*}", 1, freq);
-            self.utilization.set_text(format!("{:02}% {}GHz", utilization, frequency));
+            self.utilization.set_text(format!("{:03}% {}GHz", utilization, frequency));
         } else {
-            self.utilization.set_text(format!("{:02}%", utilization));
+            self.utilization.set_text(format!("{:03}%", utilization));
         }
         Ok(Some(self.update_interval))
     }

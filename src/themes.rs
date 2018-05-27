@@ -91,6 +91,24 @@ lazy_static! {
         alternating_tint_fg: "#000000".to_owned(),
     };
 
+    pub static ref JWOLF: Theme = Theme {
+        idle_bg: "#444444".to_owned(),
+        idle_fg: "#f5f5f5".to_owned(),
+        info_bg: "#444444".to_owned(),
+        info_fg: "#ffd680".to_owned(),
+        good_bg: "#444444".to_owned(),
+        good_fg: "#afff00".to_owned(),
+        warning_bg: "#444444".to_owned(),
+        warning_fg: "#ffaf00".to_owned(),
+        critical_bg: "#444444".to_owned(),
+        critical_fg: "#F2003C".to_owned(),
+        separator: "<<>>".to_owned(),
+        separator_bg: "#444444".to_owned(),
+        separator_fg: "#444444".to_owned(),
+        alternating_tint_bg: "#000000".to_owned(),
+        alternating_tint_fg: "#000000".to_owned(),
+    };
+
     pub static ref GRUVBOX_LIGHT: Theme = Theme {
         idle_bg: "#fbf1c7".to_owned(),
         idle_fg: "#3c3836".to_owned(),
@@ -165,6 +183,7 @@ pub fn get_theme(name: &str) -> Option<Theme> {
         "plain" => Some(PLAIN.clone()),
         "modern" => Some(MODERN.clone()),
         "bad-wolf" => Some(BAD_WOLF.clone()),
+        "jwolf" => Some(JWOLF.clone()),
         "gruvbox-light" => Some(GRUVBOX_LIGHT.clone()),
         "gruvbox-dark" => Some(GRUVBOX_DARK.clone()),
         _ => None,

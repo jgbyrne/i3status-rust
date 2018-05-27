@@ -182,13 +182,15 @@ impl Block for StaticMusic {
                         let substance = (text.chars().count() - 3) as f32;
                         
                         let tblm = title.chars().count() as f32 / substance;
-                        let ttrc = title.chars().count() - (overshoot * tblm).floor() as usize;
+                        let mut ttrc = title.chars().count() - (overshoot * tblm).floor() as usize;
+                        if ttrc < 1 || ttrc > 5000 { ttrc = 1 }
                         //println!("TBLM: {}, TTRC: {}", tblm, ttrc);
                         let tidx = title.char_indices().nth(ttrc).unwrap().0;
                         title.truncate(tidx);
 
                         let ablm = artist.chars().count() as f32 / substance; 
-                        let atrc = artist.chars().count() - (overshoot * ablm).floor() as usize;
+                        let mut atrc = artist.chars().count() - (overshoot * ablm).floor() as usize;
+                        if atrc < 1 || atrc > 5000 { atrc = 1 }
                         //println!("ABLM: {}, ATRC: {}", ablm, atrc);
                         let aidx = artist.char_indices().nth(atrc).unwrap().0;
                         artist.truncate(aidx);
