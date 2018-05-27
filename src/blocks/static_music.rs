@@ -157,9 +157,11 @@ impl Block for StaticMusic {
             } else {
                 self.player_avail = true;
 
+                // From config
                 let max = self.max_width;
 
                 if title.is_empty() {
+                    // Only display artist, truncated appropriately
                     self.current_song.set_text({
                         match artist.char_indices().nth(max) {
                             None => format!("{}", artist),
@@ -168,6 +170,7 @@ impl Block for StaticMusic {
                     }});
                 }
                 else if artist.is_empty() {
+                    // Only display title, truncated appropriately
                     self.current_song.set_text({
                         match title.char_indices().nth(max) {
                             None => format!("{}", title),
@@ -178,24 +181,51 @@ impl Block for StaticMusic {
                 else {
                     let text = format!("{} | {}", title, artist);
                     if text.chars().count() > max {
+                        
+                        // overshoot: # of chars we need to trim
+                        // substance: # of chars available for trimming
                         let overshoot = (text.chars().count() - max) as f32;
                         let substance = (text.chars().count() - 3) as f32;
                         
+                        // Calculate number of chars to trim from title
                         let tlen = title.chars().count();
-
                         let tblm = tlen as f32 / substance;
-                        let mut ttrc = tlen - (overshoot * tblm).ceil() as usize;
-                        if ttrc < 1 || ttrc > 5000 { ttrc = 1 }
-                        let tidx = title.char_indices().nth(ttrc).unwrap_or((0, 'a')).0;
-                        title.truncate(tidx);
-
-                        let alen = artist.chars().count();
+                        let mut tnum = (overshoot * tblm).ceil() as usize;
                         
-                        let ablm = alen as f32 / substance; 
-                        let mut atrc = alen - (overshoot * ablm).ceil() as usize;
+                        // Calculate number of chars to trim from artist
+                        let alen = artist.chars().count();
+                        let ablm = alen as f32 / substance;
+                        let mut anum = (overshoot * ablm).ceil() as usize;
+                        
+                        // Prefer to only trim one of the title and artist
+
+                        if (anum < tnum && anum <= 3 && (tnum + anum < tlen)) {
+                            anum = 0;
+                            tnum += anum;
+                        }
+
+                        if (tnum < anum && tnum <= 3 && (anum + tnum < alen)) {
+                            tnum = 0;
+                            anum += tnum;
+                        }
+
+                        // Calculate how many chars to keep from title and artist
+                        
+                        let mut ttrc = tlen - tnum;
+                        if ttrc < 1 || ttrc > 5000 { ttrc = 1 }
+                        
+                        let mut atrc = alen - anum;
                         if atrc < 1 || atrc > 5000 { atrc = 1 }
-                        let aidx = artist.char_indices().nth(atrc).unwrap_or((0,'a')).0;
+
+                        // Truncate artist and title to appropriate lengths
+                        
+                        let tidx = title.char_indices().nth(ttrc).unwrap_or((title.len(), 'a')).0;
+                        title.truncate(tidx);
+                        
+                        let aidx = artist.char_indices().nth(atrc).unwrap_or((artist.len(),'a')).0;
                         artist.truncate(aidx);
+
+                        // Produce final formatted string
 
                         self.current_song.set_text(
                                  format!("{} | {}", title, artist));
