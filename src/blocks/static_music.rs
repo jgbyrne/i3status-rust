@@ -180,12 +180,12 @@ impl Block for StaticMusic {
                 }
                 else {
                     let text = format!("{} | {}", title, artist);
-                    if text.chars().count() > max {
-                        
+                    let textlen = text.chars().count();
+                    if textlen > max {
                         // overshoot: # of chars we need to trim
                         // substance: # of chars available for trimming
-                        let overshoot = (text.chars().count() - max) as f32;
-                        let substance = (text.chars().count() - 3) as f32;
+                        let overshoot = (textlen - max) as f32;
+                        let substance = (textlen - 3) as f32;
                         
                         // Calculate number of chars to trim from title
                         let tlen = title.chars().count();
