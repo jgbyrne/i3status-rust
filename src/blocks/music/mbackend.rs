@@ -18,7 +18,7 @@ pub fn spawn_listener(id: String, send: Sender<Task>) {
             "interface='org.freedesktop.DBus.Properties',member='PropertiesChanged'",
         ).unwrap();
         loop {
-            for ci in c.iter(100000) {
+            for ci in c.iter(100_000) {
                 if let ConnectionItem::Signal(msg) = ci {
                     if &*msg.path().unwrap() == "/org/mpris/MediaPlayer2" && &*msg.member().unwrap() == "PropertiesChanged" {
                         send.send(Task {

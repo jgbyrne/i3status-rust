@@ -1,4 +1,4 @@
-use std::time::{Duration};
+use std::time::Duration;
 use chan::Sender;
 
 use config::Config;
@@ -10,7 +10,7 @@ use widgets::text::TextWidget;
 use widgets::button::ButtonWidget;
 use widget::{I3BarWidget, State};
 
-use blocks::dbus::{Connection};
+use blocks::dbus::Connection;
 use uuid::Uuid;
 
 use super::mbackend;
@@ -64,14 +64,14 @@ impl ConfigBlock for StaticMusic {
         let (play, prev, next) = utils::create_buttons(&block_config.buttons, &config)?;
         
         Ok(StaticMusic {
-            id: id,
+            id,
             current_song: TextWidget::new(
                 config.clone(),
             ).with_icon("music")
                 .with_state(State::Info),
-            prev: prev,
-            play: play,
-            next: next,
+            prev,
+            play,
+            next,
             dbus_conn: mbackend::dbus_connection()?,
             player_avail: false,
             player: block_config.player,
@@ -113,9 +113,9 @@ impl Block for StaticMusic {
                     // Only display artist, truncated appropriately
                     self.current_song.set_text({
                         match artist.char_indices().nth(max) {
-                            None => format!("{}", artist),
+                            None => artist.to_string(),
                             Some((i, _)) => {artist.truncate(i);
-                                             format!("{}", artist)}
+                                             artist.to_string()}
                     }});
 
                     
@@ -124,9 +124,9 @@ impl Block for StaticMusic {
                     // Only display title, truncated appropriately
                     self.current_song.set_text({
                         match title.char_indices().nth(max) {
-                            None => format!("{}", title),
+                            None => title.to_string(),
                             Some((i, _)) => {title.truncate(i);
-                                             format!("{}", title)}
+                                             title.to_string()}
                     }});
                 }
                 else {

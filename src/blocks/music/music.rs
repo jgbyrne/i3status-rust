@@ -89,7 +89,7 @@ impl ConfigBlock for Music {
         let (play, prev, next) = utils::create_buttons(&block_config.buttons, &config)?;
         
         Ok(Music {
-            id: id,
+            id,
             current_song: RotatingTextWidget::new(
                 Duration::new(block_config.marquee_interval.as_secs(), 0),
                 Duration::new(0, block_config.marquee_speed.subsec_nanos()),
@@ -97,9 +97,9 @@ impl ConfigBlock for Music {
                 config.clone(),
             ).with_icon("music")
                 .with_state(State::Info),
-            prev: prev,
-            play: play,
-            next: next,
+            prev,
+            play,
+            next,
             dbus_conn: mbackend::dbus_connection()?,
             player_avail: false,
             player: block_config.player,

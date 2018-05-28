@@ -3,10 +3,10 @@ use config::Config;
 use errors::*;
 use widgets::button::ButtonWidget;
 use widget::{I3BarWidget, State};
-use blocks::dbus::{Error};
+use blocks::dbus::Error;
 use blocks::music::mbackend::PlayerData;
 
-pub fn create_buttons(buttons: &Vec<String>, config: &Config)
+pub fn create_buttons(buttons: &[String], config: &Config)
         -> Result<(Option<ButtonWidget>, Option<ButtonWidget>, Option<ButtonWidget>)> {
     
     let mut play: Option<ButtonWidget> = None;
