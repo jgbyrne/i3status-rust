@@ -12,8 +12,10 @@ for line in sys.stdin:
             parts = line.split('"full_text"')[1:]
             acc = 0
             for p in parts:
+                if "<<>>" in p:
+                    continue
                 s = False
-                for c in parts:
+                for c in p:
                     if c == '"':
                         if s:
                             break
@@ -25,7 +27,6 @@ for line in sys.stdin:
                 print(line.replace("<<>>", "|"))
             else:
                 num = len(parts) - 1
-                print(num)
                 print(line.replace("<<>>", "|" * (pad // num)))
         else:
             print(line)
