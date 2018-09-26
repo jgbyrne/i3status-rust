@@ -7,6 +7,7 @@
 - [Disk Space](#disk-space)
 - [Focused Window](#focused-window)
 - [Load](#load)
+- [Maildir](#maildir)
 - [Memory](#memory)
 - [Music](#music)
 - [Net](#net)
@@ -69,15 +70,17 @@ You will need to ensure that the value of the `KERNEL` parameter here is the sam
 
 Creates a block which displays the current battery state (Full, Charging or Discharging), percentage charged and estimate time until (dis)charged.
 
+The battery block collapses when the battery is fully charged -- or, in the case of some Thinkpad batteries, when it reports "Not charging".
+
 ### Examples
 
-Update the battery state every ten seconds:
+Update the battery state every ten seconds, and show the time remaining until (dis)charging is complete:
 
 ```toml
 [[block]]
 block = "battery"
 interval = 10
-show = "both"
+format = "{percentage}% {time}"
 ```
 
 ### Options
@@ -86,7 +89,18 @@ Key | Values | Required | Default
 ----|--------|----------|--------
 `device` | The device in `/sys/class/power_supply/` to read from. | No | `"BAT0"`
 `interval` | Update interval, in seconds. | No | `10`
-`show` | Show remaining 'time', 'percentage' or 'both' | No | `percentage`
+`format` | A format string. See below for available placeholders. | No | `"{percentage}%"`
+`show` | Deprecated in favour of `format`. Show remaining `"time"`, `"percentage"` or `"both"` | No | `"percentage"`
+
+The `show` option is deprecated, and will be removed in future versions. In the meantime, it will override the `format` option when present.
+
+### Format string
+
+Placeholder | Description
+------------|-------------
+`{percentage}` | Battery level, in percent.
+`{time}` | Time remaining until (dis)charge is complete.
+`{power}` | Power consumption (in watts) by the battery or from the power supply when charging.
 
 ## CPU Utilization
 
@@ -167,9 +181,10 @@ Key | Values | Required | Default
 ----|--------|----------|--------
 `path` | Path to collect information from | No | `"/"`
 `alias` | Alias that is displayed for path | No | `"/"`
-`info_type` | Currently supported options are available and free | No | `"available"`
+`info_type` | Currently supported options are `available` and `free` | No | `"available"`
 `unit` | Unit that is used to display disk space. Options are MB, MiB, GB and GiB | No | `"GB"`
 `interval` | Update interval, in seconds. | No | `20`
+`show_percentage` | Show percentage of used/available disk space depending on info_type. | No | `false`
 
 ## Focused Window
 
@@ -210,6 +225,30 @@ Key | Values | Required | Default
 ----|--------|----------|--------
 `format` | Format string. You can use the placeholders 1m 5m and 15m, e.g. `"1min avg: {1m}"`. | No | `"{1m}"`
 `interval` | Update interval, in seconds. | No | `3`
+
+## Maildir
+
+Creates a block which shows unread mails. Only supports maildir format.
+
+### Examples
+
+```toml
+[[block]]
+block = "maildir"
+interval = 60
+inboxes = ["/home/user/mail/local", "/home/user/mail/gmail/Inbox"]
+threshold_warning = 1
+threshold_critical = 10
+```
+
+### Options
+
+Key | Values | Required | Default
+----|--------|----------|--------
+`inboxes` | List of maildir inboxes to look for mails in | Yes | None
+`threshold_warning` | Number of unread mails where state is set to warning | No | `1`
+`threshold_critical` | Number of unread mails where state is set to critical | No | `10`
+`interval` | Update interval, in seconds. | No | `5`
 
 ## Memory
 
@@ -295,7 +334,9 @@ Key | Values | Required | Default
 
 ## Music
 
-Creates a block which can display the current song title and artist, in a fixed width marquee fashion. It uses dbus signaling to fetch new tracks, so no periodic updates are needed. It supports all Players that implement the [MediaPlayer2 Interface](https://specifications.freedesktop.org/mpris-spec/latest/Player_Interface.html). This includes spotify, vlc and many more. Also provides buttons for play/pause, previous and next title.
+Creates a block which can display the current song title and artist, in a fixed width marquee fashion. Also provides buttons for play/pause, previous and next title.
+
+Supports all music players that implement the [MediaPlayer2 Interface](https://specifications.freedesktop.org/mpris-spec/latest/Player_Interface.html). This includes spotify, vlc and many more. 
 
 ### Examples
 
@@ -408,7 +449,7 @@ Key | Values | Required | Default
 
 Creates a block which displays the volume level (according to ALSA). Right click to toggle mute, scroll to adjust volume.
 
-The display is updated when ALSA detects changes, so there is no need to set an update interval.
+Requires `alsa-utils`.
 
 ### Examples
 
@@ -451,6 +492,8 @@ Key | Values | Required | Default
 
 Creates a block which displays the system temperature, based on lm_sensors' `sensors` output. The block is collapsed by default, and can be expanded by clicking, showing max and avg temperature. When collapsed, the color of the temperature block gives a quick indication as to the temperature (Critical when maxtemp > 80°, Warning when > 60°). Currently, you can only adjust these thresholds in source code. **Depends on lm_sensors being installed and configured!**
 
+Requires `lm_sensors` and appropriate kernel modules for your hardware.
+
 ### Examples
 
 ```toml
@@ -478,6 +521,7 @@ Creates a block which display the current time.
 [[block]]
 block = "time"
 format = "%a %d/%m %R"
+timezone = "US/Pacific"
 interval = 60
 ```
 
@@ -488,6 +532,7 @@ Key | Values | Required | Default
 `format` | Format string. See the [chrono docs](https://docs.rs/chrono/0.3.0/chrono/format/strftime/index.html#specifiers) for all options. | No | `"%a %d/%m %R"`
 `on_click` | Shell command to run when the sound block is clicked. | No | None
 `interval` | Update interval, in seconds. | No | 5
+`timezone` | A timezone specifier (e.g. "Europe/Lisbon") | No | Local timezone
 
 ## Toggle
 
@@ -532,7 +577,7 @@ Show detailed weather in San Francisco through the OpenWeatherMap service:
 ```toml
 [[block]]
 block = "weather"
-format = "{weather} ({location}) {temp}°, {wind} km/s"
+format = "{weather} ({location}) {temp}°, {wind} m/s"
 service = { name = "openweathermap", api_key = "XXX", city_id = "5398563", units = "metric" }
 ```
 

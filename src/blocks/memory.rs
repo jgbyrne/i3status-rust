@@ -2,7 +2,7 @@
 //!
 //! Creates a block displaying memory and swap usage.
 //!
-//! By default, the format of this module is "<Icon>: {MFm}MB/{MTm}MB({Mp}%)" (Swap values
+//! By default, the format of this module is "<Icon>: {MFm}MB/{MTm}MB({MUp}%)" (Swap values
 //! accordingly). That behaviour can be changed within config.json.
 //!
 //! This module keeps track of both Swap and Memory. By default, a click switches between them.
@@ -21,8 +21,8 @@
 //!
 //! Key | Values | Required | Default
 //! ----|--------|----------|--------
-//! format_mem | Format string for Memory view. All format values are described below. | No | {MFm}MB/{MTm}MB({Mp}%)
-//! format_swap | Format string for Swap view. | No | {SFm}MB/{STm}MB({Sp}%)
+//! format_mem | Format string for Memory view. All format values are described below. | No | {MFm}MB/{MTm}MB({MUp}%)
+//! format_swap | Format string for Swap view. | No | {SFm}MB/{STm}MB({SUp}%)
 //! type | Default view displayed on startup. Options are <br/> memory, swap | No | memory
 //! icons | Whether the format string should be prepended with Icons. Options are <br/> true, false | No | true
 //! clickable | Whether the view should switch between memory and swap on click. Options are <br/> true, false | No | true
@@ -282,11 +282,11 @@ pub struct MemoryConfig {
 
 impl MemoryConfig {
     fn default_format_mem() -> String {
-        "{MFm}MB/{MTm}MB({Mp}%)".to_owned()
+        "{MFm}MB/{MTm}MB({MUp}%)".to_owned()
     }
 
     fn default_format_swap() -> String {
-        "{SFm}MB/{STm}MB({Sp}%)".to_owned()
+        "{SFm}MB/{STm}MB({SUp}%)".to_owned()
     }
 
     fn default_display_type() -> Memtype {
@@ -351,7 +351,7 @@ impl Memory {
         );
         self.values.insert(
             "{MFpi}".to_string(),
-            format!("{}", mem_free.percent(mem_total) as i32),
+            format!("{:02}", mem_free.percent(mem_total) as i32),
         );
         self.values
             .insert("{MUg}".to_string(), format!("{:.1}", mem_total_used.gib()));
@@ -363,7 +363,7 @@ impl Memory {
         );
         self.values.insert(
             "{MUpi}".to_string(),
-            format!("{}", mem_total_used.percent(mem_total) as i32),
+            format!("{:02}", mem_total_used.percent(mem_total) as i32),
         );
         self.values
             .insert("{Mug}".to_string(), format!("{:.1}", mem_used.gib()));
@@ -375,7 +375,7 @@ impl Memory {
         );
         self.values.insert(
             "{Mupi}".to_string(),
-            format!("{}", mem_used.percent(mem_total) as i32),
+            format!("{:02}", mem_used.percent(mem_total) as i32),
         );
         self.values
             .insert("{MAg}".to_string(), format!("{:.1}", mem_avail.gib()));
@@ -387,7 +387,7 @@ impl Memory {
         );
         self.values.insert(
             "{MApi}".to_string(),
-            format!("{}", mem_avail.percent(mem_total) as i32),
+            format!("{:02}", mem_avail.percent(mem_total) as i32),
         );
         self.values
             .insert("{STg}".to_string(), format!("{:.1}", swap_total.gib()));
@@ -403,7 +403,7 @@ impl Memory {
         );
         self.values.insert(
             "{SFpi}".to_string(),
-            format!("{}", swap_free.percent(swap_total) as i32),
+            format!("{:02}", swap_free.percent(swap_total) as i32),
         );
         self.values
             .insert("{SUg}".to_string(), format!("{:.1}", swap_used.gib()));
@@ -415,7 +415,7 @@ impl Memory {
         );
         self.values.insert(
             "{SUpi}".to_string(),
-            format!("{}", swap_used.percent(swap_total) as i32),
+            format!("{:02}", swap_used.percent(swap_total) as i32),
         );
         self.values
             .insert("{Bg}".to_string(), format!("{:.1}", buffers.gib()));
@@ -427,7 +427,7 @@ impl Memory {
         );
         self.values.insert(
             "{Bpi}".to_string(),
-            format!("{}", buffers.percent(mem_total) as i32),
+            format!("{:02}", buffers.percent(mem_total) as i32),
         );
         self.values
             .insert("{Cg}".to_string(), format!("{:.1}", cached.gib()));
@@ -439,7 +439,7 @@ impl Memory {
         );
         self.values.insert(
             "{Cpi}".to_string(),
-            format!("{}", cached.percent(mem_total) as i32),
+            format!("{:02}", cached.percent(mem_total) as i32),
         );
 
         match self.memtype {

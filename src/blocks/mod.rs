@@ -4,7 +4,7 @@ mod load;
 mod memory;
 mod cpu;
 mod music;
-mod battery;
+pub mod battery;
 mod custom;
 mod disk_space;
 mod pacman;
@@ -18,8 +18,9 @@ mod net;
 pub mod backlight;
 mod weather;
 mod uptime;
-mod lib;
 pub mod nvidia_gpu;
+pub mod maildir;
+mod networkmanager;
 
 use config::Config;
 use self::time::*;
@@ -44,6 +45,8 @@ use self::backlight::Backlight;
 use self::weather::*;
 use self::uptime::*;
 use self::nvidia_gpu::*;
+use self::maildir::*;
+use self::networkmanager::*;
 
 use super::block::{Block, ConfigBlock};
 use errors::*;
@@ -97,6 +100,8 @@ pub fn create_block(name: &str, block_config: Value, config: Config, tx_update_r
             "backlight" => Backlight,
             "weather" => Weather,
             "uptime" => Uptime,
-            "nvidia_gpu" => NvidiaGpu
+            "nvidia_gpu" => NvidiaGpu,
+            "maildir" => Maildir,
+            "networkmanager" => NetworkManager
     )
 }

@@ -13,6 +13,9 @@ extern crate uuid;
 extern crate regex;
 extern crate num;
 extern crate inotify;
+extern crate maildir;
+extern crate chrono;
+extern crate chrono_tz;
 
 #[macro_use]
 mod de;
