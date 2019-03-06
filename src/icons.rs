@@ -128,6 +128,53 @@ lazy_static! {
         "gpu" => " \u{e333} ",
         "mail" => " \u{e0be} "
     };
+
+    pub static ref CLEAN: Map<String, String> = map_to_owned! {
+        "" => "",
+        "time" => " ",
+        "music" => " ",
+        "music_play" => ">",
+        "music_pause" => "||",
+        "music_next" => " > ",
+        "music_prev" => " < ",
+        "cogs" => " Load ",
+        "memory_mem" => " Memory ",
+        "memory_swap" => " Swap ",
+        "cpu" => " CPU ",
+        "bat" => " Battery ",
+        "bat_full" => " Charged ",
+        "bat_charging" => " Battery ",
+        "bat_discharging" => " Battery ",
+        "update" => " Update ",
+        "toggle_off" => " Off ",
+        "toggle_on" => " On ",
+        "volume_full" => " Volume ",
+        "volume_half" => " Volume ",
+        "volume_empty" => " Volume ",
+        // This icon has no spaces around it because it is manually set as text. (sound.rs)
+        "volume_muted" => "Muted",
+        "thermometer" => " Temperature ",
+        "xrandr" => " Screen ",
+        "net_up" => " Up ",
+        "net_down" => " Down ",
+        "net_wireless" => " WLAN ",
+        "net_wired" => " Ethernet ",
+        "ping" => " Ping ",
+        "backlight_empty" => " Bright ",
+        "backlight_partial1" => " Bright ",
+        "backlight_partial2" => " Bright ",
+        "backlight_partial3" => " Bright ",
+        "backlight_full" => " Bright ",
+        "weather_sun" => " Sunny ",
+        "weather_snow" => " Snow ",
+        "weather_thunder" => " Storm ",
+        "weather_clouds" => " Cloudy ",
+        "weather_rain" => " Rain ",
+        "weather_default" => " Weather ",
+        "uptime" => " Up ",
+        "gpu" => " GPU ",
+        "mail" => " "
+    };
 }
 
 pub fn get_icons(name: &str) -> Option<Map<String, String>> {
@@ -135,6 +182,7 @@ pub fn get_icons(name: &str) -> Option<Map<String, String>> {
         "material" => Some(MATERIAL.clone()),
         "awesome" => Some(AWESOME.clone()),
         "none" => Some(NONE.clone()),
+        "clean" => Some(CLEAN.clone()),
         _ => None,
     }
 }

@@ -130,7 +130,7 @@ impl Block for StaticMusic {
                     }});
                 }
                 else {
-                    let text = format!("{} | {}", title, artist);
+                    let text = format!("{} - {}", title, artist);
                     let textlen = text.chars().count();
                     if textlen > max {
                         // overshoot: # of chars we need to trim

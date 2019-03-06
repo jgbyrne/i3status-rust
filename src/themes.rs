@@ -55,6 +55,42 @@ lazy_static! {
         alternating_tint_fg: "#000000".to_owned(),
     };
 
+    pub static ref MULSANNE: Theme = Theme {
+        idle_bg: "#111120".to_owned(),
+        idle_fg: "#93a1a1".to_owned(),
+        info_bg: "#111120".to_owned(),
+        info_fg: "#93a1a1".to_owned(),
+        good_bg: "#111120".to_owned(),
+        good_fg: "#93a1a1".to_owned(),
+        warning_bg: "#111120".to_owned(),
+        warning_fg: "#b58900".to_owned(),
+        critical_bg: "#111120".to_owned(),
+        critical_fg: "#dc322f".to_owned(),
+        separator: "         ".to_owned(),
+        separator_bg: "#111120".to_owned(),
+        separator_fg: "#111120".to_owned(),
+        alternating_tint_bg: "#000000".to_owned(),
+        alternating_tint_fg: "#000000".to_owned(),
+    };
+
+    pub static ref BRM: Theme = Theme {
+        idle_bg: "#021314".to_owned(),
+        idle_fg: "#93a1a1".to_owned(),
+        info_bg: "#021314".to_owned(),
+        info_fg: "#93a1a1".to_owned(),
+        good_bg: "#021314".to_owned(),
+        good_fg: "#93a1a1".to_owned(),
+        warning_bg: "#021314".to_owned(),
+        warning_fg: "#b58900".to_owned(),
+        critical_bg: "#021314".to_owned(),
+        critical_fg: "#dc322f".to_owned(),
+        separator: "         ".to_owned(),
+        separator_bg: "#021314".to_owned(),
+        separator_fg: "#021314".to_owned(),
+        alternating_tint_bg: "#000000".to_owned(),
+        alternating_tint_fg: "#000000".to_owned(),
+    };
+
     pub static ref PLAIN: Theme = Theme {
         idle_bg: "#000000".to_owned(),
         idle_fg: "#93a1a1".to_owned(),
@@ -181,6 +217,8 @@ pub fn get_theme(name: &str) -> Option<Theme> {
         "slick" => Some(SLICK.clone()),
         "solarized-dark" => Some(SOLARIZED_DARK.clone()),
         "plain" => Some(PLAIN.clone()),
+        "mulsanne" => Some(MULSANNE.clone()),
+        "brm" => Some(BRM.clone()),
         "modern" => Some(MODERN.clone()),
         "bad-wolf" => Some(BAD_WOLF.clone()),
         "jwolf" => Some(JWOLF.clone()),
