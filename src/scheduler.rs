@@ -54,11 +54,7 @@ impl UpdateScheduler {
             });
         }
 
-        UpdateScheduler { schedule: schedule }
-    }
-
-    pub fn schedule(&mut self, task: Task) {
-        self.schedule.push(task);
+        UpdateScheduler { schedule }
     }
 
     pub fn time_to_next_update(&self) -> Option<Duration> {

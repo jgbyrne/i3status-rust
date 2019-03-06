@@ -72,6 +72,8 @@ Creates a block which displays the current battery state (Full, Charging or Disc
 
 The battery block collapses when the battery is fully charged -- or, in the case of some Thinkpad batteries, when it reports "Not charging".
 
+The battery block supports reading charging and status information from `sysfs`, or optionally through the [Upower](https://upower.freedesktop.org/) D-Bus interface on systems where that is available.
+
 ### Examples
 
 Update the battery state every ten seconds, and show the time remaining until (dis)charging is complete:
@@ -83,6 +85,15 @@ interval = 10
 format = "{percentage}% {time}"
 ```
 
+Rely on Upower for battery updates and information:
+
+```toml
+[[block]]
+block = "battery"
+upower = true
+format = "{percentage}% {time}"
+```
+
 ### Options
 
 Key | Values | Required | Default
@@ -91,6 +102,7 @@ Key | Values | Required | Default
 `interval` | Update interval, in seconds. | No | `10`
 `format` | A format string. See below for available placeholders. | No | `"{percentage}%"`
 `show` | Deprecated in favour of `format`. Show remaining `"time"`, `"percentage"` or `"both"` | No | `"percentage"`
+`upower` | When `true`, use the Upower D-Bus interface for battery updates. | No | `false`
 
 The `show` option is deprecated, and will be removed in future versions. In the meantime, it will override the `format` option when present.
 
@@ -336,11 +348,13 @@ Key | Values | Required | Default
 
 Creates a block which can display the current song title and artist, in a fixed width marquee fashion. Also provides buttons for play/pause, previous and next title.
 
-Supports all music players that implement the [MediaPlayer2 Interface](https://specifications.freedesktop.org/mpris-spec/latest/Player_Interface.html). This includes spotify, vlc and many more. 
+Supports all music players that implement the [MediaPlayer2 Interface](https://specifications.freedesktop.org/mpris-spec/latest/Player_Interface.html). This includes spotify, vlc and many more.
+
+It can be configured to drive a specific (running) player or to automatically discover the currently active one. Most often, you only run one player at a time.
 
 ### Examples
 
-Show the currently playing song on Spotify, with play & next buttons:
+Show the currently playing song on Spotify only, with play & next buttons:
 
 ```toml
 [[block]]
@@ -349,11 +363,20 @@ player = "spotify"
 buttons = ["play", "next"]
 ```
 
+Same thing for any compatible player, takes the first active on the bus:
+
+```toml
+[[block]]
+block = "music"
+buttons = ["play", "next"]
+```
+
+
 ### Options
 
 Key | Values | Required | Default
 ----|--------|----------|--------
-`player` | Name of the music player. Must be the same name the player is registered with the MediaPlayer2 Interface.  | Yes | None
+`player` | Name of the music player. Must be the same name the player is registered with the MediaPlayer2 Interface.  If unset, it will automatically discover the active player.  | Yes | None
 `max_width` | Max width of the block in characters, not including the buttons | No | `21`
 `marquee` | Bool to specify if a marquee style rotation should be used if the title + artist is longer than max-width | No | `true`
 `marquee_interval` | Marquee interval in seconds. This is the delay between each rotation. | No | `10`
@@ -397,7 +420,7 @@ Proprietary nvidia driver required.
 
 Creates a block which displays the Nvidia GPU utilization, temperature, used and total memory, fan speed, gpu clocks. You can set gpu label, that displayed by default.
 
-Clicking the left button on the icon changes the output of the label to the output of the gpu name. Same with memory: used/total. 
+Clicking the left button on the icon changes the output of the label to the output of the gpu name. Same with memory: used/total.
 
 Clicking the left button on the fans turns on the mode of changing the speed of the fans using the wheel. Press again to turn off the mode. For this opportunity you need nvidia-settings!
 
@@ -447,9 +470,15 @@ Key | Values | Required | Default
 
 ## Sound
 
-Creates a block which displays the volume level (according to ALSA). Right click to toggle mute, scroll to adjust volume.
+Creates a block which displays the volume level (according to PulseAudio or ALSA). Right click to toggle mute, scroll to adjust volume.
 
-Requires `alsa-utils`.
+Requires a PulseAudio installation or `alsa-utils` for ALSA.
+
+PulseAudio support is a feature and can be turned on (`--features "pulseaudio"`) / off (`--no-default-features`) during build with `cargo`.
+If PulseAudio support is enabled the `"auto"` driver will first try to connect to PulseAudio and then fallback to ALSA on error.
+
+
+Note that if you are using PulseAudio commands (such as `pactl`) to control your volume, you should select the `"pulseaudio"` (or `"auto"`) driver to see volume changes that exceed 100%.
 
 ### Examples
 
@@ -465,6 +494,8 @@ step_width = 3
 
 Key | Values | Required | Default
 ----|--------|----------|--------
+`driver` | `"auto"`, `"pulseaudio"`, `"alsa"` | No | `"auto"` (Pulseaudio with ALSA fallback)
+`name` | PulseAudio / ALSA device name | No | Default Device (`@DEFAULT_SINK@` / `Master`)
 `step_width` | The percent volume level is increased/decreased for the selected audio device when scrolling. Capped automatically at 50. | No | `5`
 `on_click` | Shell command to run when the sound block is clicked. | No | None
 
@@ -490,7 +521,7 @@ Key | Values | Required | Default
 
 ## Temperature
 
-Creates a block which displays the system temperature, based on lm_sensors' `sensors` output. The block is collapsed by default, and can be expanded by clicking, showing max and avg temperature. When collapsed, the color of the temperature block gives a quick indication as to the temperature (Critical when maxtemp > 80°, Warning when > 60°). Currently, you can only adjust these thresholds in source code. **Depends on lm_sensors being installed and configured!**
+Creates a block which displays the system temperature, based on lm_sensors' `sensors` output. The block is collapsed by default, and can be expanded by clicking, showing max and avg temperature. When collapsed, the color of the temperature block gives a quick indication as to the temperature (Critical when maxtemp > 80°, Warning when > 60°). **Depends on lm_sensors being installed and configured!**
 
 Requires `lm_sensors` and appropriate kernel modules for your hardware.
 
@@ -510,6 +541,10 @@ Key | Values | Required | Default
 ----|--------|----------|--------
 interval | Update interval, in seconds. | No | 5
 collapsed | Collapsed by default? | No | true
+`good` | Maximum temperature to set state to good. | No | `20`
+`idle` | Maximum temperature to set state to idle. | No | `45`
+`info` | Maximum temperature to set state to info. | No | `60`
+`warning` | Maximum temperature to set state to warning. Beyond this temperature, state is set to critical | No | `80`
 
 ## Time
 
@@ -530,7 +565,7 @@ interval = 60
 Key | Values | Required | Default
 ----|--------|----------|--------
 `format` | Format string. See the [chrono docs](https://docs.rs/chrono/0.3.0/chrono/format/strftime/index.html#specifiers) for all options. | No | `"%a %d/%m %R"`
-`on_click` | Shell command to run when the sound block is clicked. | No | None
+`on_click` | Shell command to run when the time block is clicked. | No | None
 `interval` | Update interval, in seconds. | No | 5
 `timezone` | A timezone specifier (e.g. "Europe/Lisbon") | No | Local timezone
 
@@ -559,9 +594,12 @@ interval = 5
 
 Key | Values | Required | Default
 ----|--------|----------|--------
+`text` | Label to include next to the toggle icon. | No | ""
 `command_on` | Shell Command to enable the toggle | Yes | None
 `command_off` | Shell Command to disable the toggle | Yes | None
 `command_state` | Shell Command to determine toggle state. Empty output => off. Any output => on.| Yes | None
+`icon_on` | Icon override for the toggle button while on. | No | "toggle_on"
+`icon_off` | Icon override for the toggle button while off. | No | "toggle_off"
 `interval` | Update interval, in seconds. | No | None
 
 ## Weather
@@ -577,7 +615,7 @@ Show detailed weather in San Francisco through the OpenWeatherMap service:
 ```toml
 [[block]]
 block = "weather"
-format = "{weather} ({location}) {temp}°, {wind} m/s"
+format = "{weather} ({location}) {temp}°, {wind} m/s {direction}"
 service = { name = "openweathermap", api_key = "XXX", city_id = "5398563", units = "metric" }
 ```
 
@@ -608,6 +646,7 @@ Key | Value
 `{temp}` | Temperature.
 `{weather}` | Textual description of the weather, e.g. "Raining".
 `{wind}` | Wind speed.
+`{direction}` | Wind direction, e.g. "NE".
 
 ## Uptime
 Creates a block which displays system uptime. The block will always display the 2 biggest units, so minutes and seconds, or hours and minutes or days and hours or weeks and days.

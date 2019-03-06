@@ -16,6 +16,8 @@ extern crate inotify;
 extern crate maildir;
 extern crate chrono;
 extern crate chrono_tz;
+#[cfg(feature = "pulseaudio")]
+extern crate libpulse_binding as pulse;
 
 #[macro_use]
 mod de;
@@ -32,11 +34,11 @@ mod scheduler;
 mod widget;
 mod widgets;
 
-#[cfg(debug_assertions)]
+#[cfg(feature = "profiling")]
 extern crate cpuprofiler;
-#[cfg(debug_assertions)]
+#[cfg(feature = "profiling")]
 use cpuprofiler::PROFILER;
-#[cfg(debug_assertions)]
+#[cfg(feature = "profiling")]
 extern crate progress;
 
 use std::collections::HashMap;
@@ -138,31 +140,10 @@ fn run(matches: &ArgMatches) -> Result<()> {
     let (tx_update_requests, rx_update_requests): (Sender<Task>, Receiver<Task>) = chan::async();
 
     // In dev build, we might diverge into profiling blocks here
-    #[cfg(debug_assertions)]
-    if_debug!({
-        if matches.value_of("profile").is_some() {
-            for &(ref block_name, ref block_config) in &config.blocks {
-                if block_name == matches.value_of("profile").unwrap() {
-                    let mut block = create_block(
-                        &block_name,
-                        block_config.clone(),
-                        config.clone(),
-                        tx_update_requests.clone(),
-                    )?;
-                    profile(
-                        matches
-                            .value_of("profile-runs")
-                            .unwrap()
-                            .parse::<i32>()
-                            .unwrap(),
-                        &block_name,
-                        block.deref_mut(),
-                    );
-                    return Ok(());
-                }
-            }
-        }
-    });
+    if let Some(name) = matches.value_of("profile") {
+        profile_config(name, matches.value_of("profile-runs").unwrap(), &config, &tx_update_requests)?;
+        return Ok(());
+    }
 
     let mut config_alternating_tint = config.clone();
     {
@@ -211,7 +192,7 @@ fn run(matches: &ArgMatches) -> Result<()> {
 
     // We save the order of the blocks here,
     // because they will be passed to an unordered HashMap
-    let order = blocks.iter().map(|x| String::from(x.id())).collect();
+    let order = blocks.iter().map(|x| String::from(x.id())).collect::<Vec<_>>();
 
     let mut scheduler = UpdateScheduler::new(&blocks);
 
@@ -235,21 +216,20 @@ fn run(matches: &ArgMatches) -> Result<()> {
 
         chan_select! {
             // Receive click events
-            rx_clicks.recv() -> res => match res {
-                Some(event) => {
+            rx_clicks.recv() -> res => if let Some(event) = res {
                     for block in block_map.values_mut() {
                         block.click(&event)?;
                     }
                     util::print_blocks(&order, &block_map, &config)?;
-                },
-                None => ()
             },
             // Receive async update requests
-            rx_update_requests.recv() -> res => match res {
-                Some(request) => {
-                    scheduler.schedule(request);
-                },
-                None => ()
+            rx_update_requests.recv() -> res => if let Some(request) = res {
+                // Process immediately and forget
+                block_map
+                    .get_mut(&request.id)
+                    .internal_error("scheduler", "could not get required block")?
+                    .update()?;
+                util::print_blocks(&order, &block_map, &config)?;
             },
             // Receive update timer events
             ttnu.recv() => {
@@ -268,7 +248,7 @@ fn run(matches: &ArgMatches) -> Result<()> {
     }
 }
 
-#[cfg(debug_assertions)]
+#[cfg(feature = "profiling")]
 fn profile(iterations: i32, name: &str, block: &mut Block) {
     let mut bar = progress::Bar::new();
     println!(
@@ -292,4 +272,33 @@ fn profile(iterations: i32, name: &str, block: &mut Block) {
     }
 
     PROFILER.lock().unwrap().stop().unwrap();
+}
+
+#[cfg(feature = "profiling")]
+fn profile_config(name: &str, runs: &str, config: &Config, update: Sender<Task>) -> Result<()> {
+    let profile_runs = runs.parse::<i32>()
+        .configuration_error("failed to parse --profile-runs as an integer")?;
+    for &(ref block_name, ref block_config) in &config.blocks {
+        if block_name == name {
+            let mut block = create_block(
+                &block_name,
+                block_config.clone(),
+                config.clone(),
+                update.clone(),
+            )?;
+            profile(profile_runs, &block_name, block.deref_mut());
+            break;
+        }
+    }
+    Ok(())
+}
+
+#[cfg(not(feature = "profiling"))]
+fn profile_config(_name: &str, _runs: &str, _config: &Config, _update: &Sender<Task>) -> Result<()> {
+    // TODO: Maybe we should just panic! here.
+    Err(InternalError(
+        "profile".to_string(),
+        "The 'profiling' feature was not enabled at compile time.".to_string(),
+        None,
+    ))
 }

@@ -28,13 +28,19 @@ impl ButtonWidget {
                 "background": "#000000",
                 "color": "#000000"
             }),
-            config: config,
+            config,
             cached_output: None,
         }
     }
 
     pub fn with_icon(mut self, name: &str) -> Self {
         self.icon = self.config.icons.get(name).cloned();
+        self.update();
+        self
+    }
+
+    pub fn with_content(mut self, content: Option<String>) -> Self {
+        self.content = content;
         self.update();
         self
     }
@@ -51,8 +57,8 @@ impl ButtonWidget {
         self
     }
 
-    pub fn set_text(&mut self, content: String) {
-        self.content = Some(content);
+    pub fn set_text<S: Into<String>>(&mut self, content: S) {
+        self.content = Some(content.into());
         self.update();
     }
 
